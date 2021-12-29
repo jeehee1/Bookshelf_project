@@ -14,6 +14,15 @@ BOOKS_PER_SHELF = 8
 #   - Make sure for each route that you're thinking through when to abort and with which kind of error
 #   - If you change any of the response body keys, make sure you update the frontend to correspond.
 
+def paginate_book(request, selection):
+    page = request.args.get('page', 1, type=int)
+    start = (page - 1) * 10
+    end = start + BOOKS_PER_SHELF
+
+    books = [book.format() for book in selection]
+    current_books = books[start:end]
+
+    return current_books
 
 def create_app(test_config=None):
     # create and configure the app
@@ -41,19 +50,17 @@ def create_app(test_config=None):
 
     @app.route('/books')
     def get_books():
+        selection = Book.query.order_by(Book.id).all()
+        current_books = paginate_book(request, selection)     
 
-        page = request.args.get('page', 1, type=int)
-        start = (page - 1) * 10
-        end = start + BOOKS_PER_SHELF
-
-        books = Book.query.all()
-        formatted_books = [book.format() for book in books]
-        
-        return jsonify({
-            'success' : True,
-            'books' : formatted_books[start:end],
-            'total_books' : len(formatted_books)
-        })
+        if len(current_books) == 0:  
+            abort(404)
+        else:
+            return jsonify({
+                'success' : True,
+                'books' : current_books,
+                'total_books' : len(selection)
+            })
 
     @app.route('/books/<int:book_id>')
     def get_specific_book(book_id):
