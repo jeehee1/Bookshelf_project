@@ -55,6 +55,17 @@ def create_app(test_config=None):
             'total_books' : len(formatted_books)
         })
 
+    @app.route('/books/<int:book_id>')
+    def get_specific_book(book_id):
+        book = Book.query.filter(Book.id == book_id).one_or_none()
+        if book is None:
+            abort(404)
+        else:
+            return jsonify({
+                'success' : True,
+                'book' : book.format()
+            })
+
 
     # @TODO: Write a route that will update a single book's rating.
     #         It should only be able to update the rating, not the entire representation
