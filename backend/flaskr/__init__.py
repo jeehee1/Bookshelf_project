@@ -108,6 +108,25 @@ def create_app(test_config=None):
 
     # TEST: When completed, you will be able to delete a single book by clicking on the trashcan.
 
+    @app.route('/books/<int:book_id>', methods=['DELETE'])
+    def delete_book(book_id):
+        book = Book.query.filter(Book.id==book_id).one_or_none()
+        try:
+            if book is None:
+                abort(404)
+            
+            book.delete()
+            selection = Book.query.order_by(Book.id).all()
+            current_books = paginate_book(request, selection)
+            return jsonify({
+                'success' : True,
+                'deleted_book' : book_id,
+                'book' : current_books,
+                'total_books' : len(selection)
+            })
+        except:
+            abort(422)
+
     # @TODO: Write a route that create a new book.
     #        Response body keys: 'success', 'created'(id of created book), 'books' and 'total_books'
     # TEST: When completed, you will be able to a new book using the form. Try doing so from the last page of books.
