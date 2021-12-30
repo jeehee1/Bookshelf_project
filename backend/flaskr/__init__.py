@@ -170,6 +170,15 @@ def create_app(test_config=None):
             'success' : False,
             'error' : 404,
             'message' : "Unprocessable"
-        }), 404
+        }), 422
+
+    @app.errorhandler(400)
+    def bad_request(error):
+        jsonify({
+            'success' : False,
+            'error' : 400,
+            'message' : "Bad Request"
+        }), 400
+
 
     return app
