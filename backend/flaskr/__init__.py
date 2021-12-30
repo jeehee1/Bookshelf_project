@@ -156,7 +156,7 @@ def create_app(test_config=None):
             abort(422)
 
     @app.errorhandler(404)
-    def Not_Found(error):
+    def not_found(error):
         jsonify({
             'success' : False,
             'error' : 404,
